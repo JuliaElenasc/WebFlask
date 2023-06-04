@@ -1,17 +1,5 @@
-from flask import Flask, render_template, request, redirect, url_for,flash
-from flask_mysqldb import MySQL
-
-
-
-app = Flask(__name__)
-app.config['MYSQL_HOST']='localhost'
-app.config['MYSQL_USER']='root'
-app.config['MYSQL_PASSWORD']=''
-app.config['MYSQL_DB']='flaskregistro'
-mysql=MySQL(app)
-
-
-#listaUtenti = []
+from flask import Flask, render_template, request, redirect, url_for, flash
+from config_ws import app, controloDB, Utente
 
 @app.route('/')
 def home():
@@ -22,10 +10,7 @@ def login():
     if request.method == 'POST':
         user = request.form['user']
         password = request.form['password']
-        cur = mysql.connection.cursor()
-        cur.execute('SELECT * FROM registro WHERE user = %s AND password = %s', (user, password))
-        data = cur.fetchone()
-        cur.close()
+        data = controloDB.ottenere_utente(user, password)
 
         if data:
             dettaglioUtente = {
@@ -38,7 +23,6 @@ def login():
         else:
             flash('Credenziali errate, prova di nuovo')
             return redirect(url_for('login'))
-
     return render_template('login.html')
 
 
@@ -49,32 +33,26 @@ def registro():
 @app.route('/addregistro', methods=['POST'])
 def add_registro():    
     if request.method =='POST':
-        user=request.form['user']
-        password=request.form['password']
-        nascita=request.form['nascita']
-        corso=request.form['corso']
-        cur= mysql.connection.cursor()
-        print(cur)
-        cur.execute('INSERT INTO registro (user, password, nascita, corso) VALUES(%s,%s,%s,%s)',
-                    (user, password, nascita, corso))
-        mysql.connection.commit()
-
-        dettaglioUtente = {"username": user, "password": password, "nascita": nascita, "corso": corso}
+        user = request.form['user']
+        password = request.form['password']
+        nascita = request.form['nascita']
+        corso = request.form['corso']
+        usuario = Utente(user, password, nascita, corso)
+        controloDB.inserire_utente(usuario)
+        #dettaglioUtente = {"username": user, "password": password, "nascita": nascita, "corso": corso}
+        return render_template('dettaglio.html', dettaglioUtente=usuario)
         #listaUtenti.append(dictUtente)
-
         #flash('Ti sei registrato')
-        return render_template ('dettaglio.html', dettaglioUtente=dettaglioUtente)
-        #return redirect(url_for('/detaglio'))
+                #return redirect(url_for('/detaglio'))
     
 
 @app.route('/detaglio')
 def dettaglio():
-    cur = mysql.conection.cursor()
-    cur.execute('SELECT*FROM registro')
-    data=cur.fetchall()
-    cur.close()
-    return render_template ('dettaglio.html',dettaglioUtente=data)
-
+    data = controloDB.restituire_dati()
+    return render_template('dettaglio.html', dettaglioUtente=data)
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    try:
+        app.run(debug=True)
+    except KeyboardInterrupt:
+        controloDB.chiudere()
