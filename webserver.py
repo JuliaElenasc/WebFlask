@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, redirect, url_for, flash
-from config_ws import app, controloDB, Utente
+from config_ws import User, app, DevelopmentConfig , DataBase
 
 @app.route('/')
 def home():
@@ -10,7 +10,7 @@ def login():
     if request.method == 'POST':
         user = request.form['user']
         password = request.form['password']
-        data = controloDB.ottenere_utente(user, password)
+        data = DataBase.obtain_user(user, password)
 
         if data:
             dettaglioUtente = {
@@ -20,6 +20,7 @@ def login():
                 "corso": data[4]
             }
             return render_template('dettaglio.html', dettaglioUtente=dettaglioUtente)
+            #return redirect("/detaglio") --> respuesta 302
         else:
             flash('Credenziali errate, prova di nuovo')
             return redirect(url_for('login'))
@@ -37,22 +38,17 @@ def add_registro():
         password = request.form['password']
         nascita = request.form['nascita']
         corso = request.form['corso']
-        usuario = Utente(user, password, nascita, corso)
-        controloDB.inserire_utente(usuario)
-        #dettaglioUtente = {"username": user, "password": password, "nascita": nascita, "corso": corso}
+        usuario = User(user, password, nascita, corso)
+        DataBase.insert_user(usuario)
         return render_template('dettaglio.html', dettaglioUtente=usuario)
-        #listaUtenti.append(dictUtente)
-        #flash('Ti sei registrato')
-                #return redirect(url_for('/detaglio'))
-    
-
+        
 @app.route('/detaglio')
 def dettaglio():
-    data = controloDB.restituire_dati()
+    data = DataBase.obtain_user()
     return render_template('dettaglio.html', dettaglioUtente=data)
 
 if __name__ == '__main__':
     try:
         app.run(debug=True)
     except KeyboardInterrupt:
-        controloDB.chiudere()
+        DataBase.close()
