@@ -79,7 +79,7 @@ def add_action():
        date= datetime.now()
        id_Dev = request.form.get('deviceId')
        intensity = request.form.get('brightness')
-       battery= 100-(intensity* 2)
+       battery= 100-(int(intensity)* 2)
        id_user = 1
        value_state = request.form.get('check')
        

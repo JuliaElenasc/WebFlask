@@ -83,11 +83,20 @@ class DataBase:
             print(device)
             return device
         else:
+            
             return None
         
-          
+            
 
-    
+    @staticmethod
+    def obtener_id_Dev():
+        sql= "SELECT id FROM device WHERE device = %s"
+        values=("Lamp",)
+        result= DataBase.execute_query(sql,values,fetch_one=True)
+        if result:
+            return result[0]
+        else:
+            return None
 
 
     @staticmethod
