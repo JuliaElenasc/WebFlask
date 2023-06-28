@@ -14,12 +14,13 @@ class DevelopmentConfig:
     DEBUG=True # Para mostrar mensajes detallados y reiniciar automáticamente la aplicación cuando se detectan cambios.
 
 class User: 
-    def __init__(self, username, password, nascita, corso,id): # Se ejecuta automáticamente cuando se crea una nueva instancia de la clase.
+    def __init__(self, username, password, nascita, corso,id,is_admin): # Se ejecuta automáticamente cuando se crea una nueva instancia de la clase.
         self.username = username #atributos de la clase (publicos por defecto)
         self.password = password
         self.nascita = nascita
         self.corso = corso
         self.id=id
+        self.is_admin=is_admin
 
 class Device:
     def __init__(self, id,device, stanza):
@@ -60,7 +61,6 @@ class DataBase:
     def obtain_device():
         sql = 'SELECT * FROM device'
         devices = DataBase.execute_query(sql, fetch_one=False)
-        print("DataBase obtain_device ", devices)
         return devices
     
     @staticmethod
@@ -80,25 +80,25 @@ class DataBase:
                 'device': result[1],
                 'stanza': result[2]
              }
-            print(device)
             return device
         else:
             
             return None
+    
+    @staticmethod
+    def getDevice():
+        sql= "SELECT device FROM device"
+        return DataBase.execute_query(sql,fetch_one=False)
         
-            
 
     @staticmethod
-    def obtener_id_Dev():
-        sql= "SELECT id FROM device WHERE device = %s"
-        values=("Lamp",)
-        result= DataBase.execute_query(sql,values,fetch_one=True)
-        if result:
-            return result[0]
-        else:
-            return None
-
-
+    def request_graphic(selected_drop_down_value):
+        sql = "SELECT a.date, a.intensity, d.%s FROM actions AS a JOIN device AS d ON a.id_Dev = d.id;"
+        column_name = "device"
+        sql = sql % column_name
+        result = DataBase.execute_query(sql, fetch_one=False)
+        return result
+    
     @staticmethod
     def execute_query(sql, values=None, fetch_one=False):
         cur = mysql.connection.cursor() #crea un cursor, para ejecutar comandos y recuperar info de la BD

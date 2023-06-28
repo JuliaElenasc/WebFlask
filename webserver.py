@@ -1,6 +1,12 @@
 from flask import Flask, render_template, request, redirect, url_for, flash
-from config_ws import User, app, DataBase,Device,Action
+from config_ws import User, app, DataBase,Device,Action, mysql
 from datetime import datetime
+import pandas as pd
+import dash
+from dash.dependencies import Input, Output
+from dash import dcc
+from dash import html
+import plotly.graph_objects as go
 
 @app.route('/')
 def home():
@@ -25,12 +31,15 @@ def login():
                 "nascita": data[3],
                 "corso": data[4]
             }
-            print("WebServer login", dataDev)
-
-            return render_template('dettaglio.html', dettaglioUtente=dettaglioUtente, listDevice = listDevice)
+            
+            if bool(data[6]): # 6 es el ultimo elemento en la lista resultante de la query
+                return redirect('/report/')
+            else:
+                return render_template('dettaglio.html', dettaglioUtente=dettaglioUtente, listDevice = listDevice)
         else:
             flash('Credenziali errate, prova di nuovo')
             return redirect(url_for('login'))
+    
     return render_template('login.html')
 
 
@@ -58,8 +67,7 @@ def dettaglio():
 @app.route('/device', methods=['GET','POST'])
 def add_action():
     if request.method == 'GET':
-        device_id = request.args.get('deviceId')
-        
+        device_id = request.args.get('deviceId')       
         if device_id is not None: 
             id = int(device_id)
         else: id = None
@@ -67,12 +75,10 @@ def add_action():
         device = DataBase.getDeviceById(id)
         if device:
             objDevice = Device(device.get('id'), device.get('device'), device.get('stanza'))
-            
             return render_template("device.html", device=objDevice)
         else:
             
             return "Device not found"
-            #creare istanza della classe device in base ai dati ottenuti dal DB (come fatto in listDevice di Login)
 
     elif request.method=='POST':
        
@@ -92,6 +98,41 @@ def add_action():
     else:
         return render_template("device.html")
     
+@app.route('/logout')
+def logout():
+    return redirect(('/'))
+
+app_d = dash.Dash(__name__, server=app, url_base_pathname='/report/')
+
+app_d.layout = html.Div([
+    dcc.Dropdown(
+        id='my-dropdown',
+        options = [],
+        value=None
+    ),
+    dcc.Graph(id='my-graph')
+], style={'width': '500px'})
+
+@app_d.callback( Output('my-dropdown', 'options'), Output('my-dropdown', 'value'), [Input('my-dropdown', 'search')])
+def update_dropdown(search_value):
+    results = DataBase.getDevice()
+    options = [{'label': device[0], 'value': device[0]} for device in results]
+    value=None
+    return options, value
+
+@app_d.callback(Output('my-graph', 'figure'), [Input('my-dropdown', 'value')])
+def update_graph(selected_drop_down_value):
+    result = DataBase.request_graphic(selected_drop_down_value)
+    result_list = [result]  # Convertir el resultado en una lista de una tupla
+    df = pd.DataFrame(result_list, columns=['date', 'intensity', 'device'])
+    fig = go.Figure()
+    fig.add_trace(go.Scatter(x=df['date'], y=df['intensity'], mode='lines'))
+
+    layout = {'margin': {'l': 40, 'r': 10, 't': 20, 'b': 30}}
+    fig.update_layout(layout)
+
+    return fig
+
 
 if __name__ == '__main__':
     try:
@@ -99,10 +140,5 @@ if __name__ == '__main__':
     except KeyboardInterrupt:
         DataBase.close()
 
-
-# app.route(/get reg",methods post)
-#def post registrazione()
-#nome=request.form[user]
 #Unir registro y add registro
 #Crear en vez de flash un otro html else reurn redirect al endpoint return(redirect"/passerror")
-# 

@@ -2,16 +2,15 @@
 <html>
 <head>
   <title>Titolo della pagina</title>
-  <link rel="stylesheet" type="text/css" href="CSS/device.css">
+  <link rel="stylesheet" type="text/css" href="static/device.css">
 </head>
 <body>
 <header id="controls">
   <quote></quote>
   <h2>Setup</h2>
   <h3>Turn on the lamp</h3>
-  
   <form action='/device' method="POST" >
-    <input name="deviceId" type="text" value="{{device.id}}"> 
+    <input name="deviceId" type="hidden" value="{{device.id}}"> 
     <div class="Turn_on"> <!-- Botón para encender -->
       <input type="checkbox" name="check" value="1" id="Turn_on"  checked/>
       <label for="Turn_on"></label>
@@ -20,11 +19,12 @@
       <h3>Adjust light brightness</h3>
       <input id="contrast" type="range" name="brightness" value="5" max="5" min="0" step="1" value="0"></input>
     </div>
-    <div>
-      <h3> Battery</h3>
-      <input type="text" name="battery" value="100">
-    </div>
-    <div><input type="submit" value="Save"></div>
+    
+    <div> 
+      <input class="button" type="submit" value="Save">
+      <a class="button" href="/logout">Logout</a>
+      <a class="button" href="/programa">Programa</a>
+    </div>  
   
   <!-- Nivel de batería -->
   
