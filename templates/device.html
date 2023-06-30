@@ -1,8 +1,16 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Titolo della pagina</title>
+  <title>ControlDevice</title>
   <link rel="stylesheet" type="text/css" href="static/device.css">
+  <style>
+    .personalized-options {
+      display: none;
+    }
+    #personalized:checked + .personalized-options {
+      display: block;
+    }
+  </style>
 </head>
 <body>
 <header id="controls">
@@ -23,7 +31,7 @@
     <div> 
       <input class="button" type="submit" value="Save">
       <a class="button" href="/logout">Logout</a>
-      <a class="button" href="/programa">Programa</a>
+      <button class="button" type="submit" formaction="/program">Programa</button>
     </div>  
   
   <!-- Nivel de batería -->

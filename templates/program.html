@@ -1,0 +1,71 @@
+<html>
+<head>
+  <title>Program</title>
+  <link rel="stylesheet" type="text/css" href="static/device.css">
+  <style>
+    .personalized-options {
+      display: none;
+    }
+    #personalized:checked + .personalized-options {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+<header id="controls">
+  <h2>Programming</h2>
+      
+  <form action="/program" method="POST">
+
+    <h3>Hour</h3>
+    <div class="data">
+        <label for="time">Time:</label>
+        <input type="time" id="time" name="time">
+    </div>
+    <h3>Frequency</h3>
+    <div class="data">
+      <input type="radio" name="option" value="oggi" id="oggi">
+      <label for="oggi">Oggi</label>
+      <input type="radio" name="option" value="lun_vie" id="lun_vie">
+      <label for="lun_vie">Lun-Ven</label>
+      <input type="radio" name="option" value="every_day" id="every_day">
+      <label for="every_day">Tutti giorni</label>
+      <input type="radio" name="option" value="personalized" id="personalized">
+      <label for="personalized">Personalizzato</label>
+      <div class="personalized-options">
+        <h3>Personalized Options</h3>
+        <input type="checkbox" name="Monday" value="Monday" id="Monday">
+        <label for="Monday">Monday</label>
+        <input type="checkbox" name="Tuesday" value="Tuesday" id="Tuesday">
+        <label for="Tuesday">Tuesday</label>
+        <input type="checkbox" name="Wednesday" value="Wednesday" id="Wednesday">
+        <label for="Wednesday">Wednesday</label>
+        <input type="checkbox" name="Thursday" value="Thursday" id="Thursday">
+        <label for="Wednesday">Thursday</label>
+        <input type="checkbox" name="Friday" value="Friday" id="Friday">
+        <label for="Wednesday">Friday</label>
+        <input type="checkbox" name="Saturday" value="Saturday" id="Saturday">
+        <label for="Wednesday">Saturday</label>
+        <input type="checkbox" name="Sunday" value="Sunday" id="Sunday">
+        <label for="Sunday">Sunday</label>
+      </div>
+    </div>
+    <div id="regulate_intensity"> <!-- Intensidad -->
+      <h3>Adjust light brightness</h3>
+      <input id="contrast" type="range" name="brightness" value="5" max="5" min="0" step="1"></input>
+    </div>
+    <div> 
+      <input class="button" type="submit" value="Save">
+    </div>
+  </form>
+</header>
+
+<script>
+  document.getElementById("personalized").addEventListener("change", function() {
+    var personalizedOptions = document.querySelector(".personalized-options");
+    personalizedOptions.style.display = this.checked ? "block" : "none";
+  });
+</script>
+
+</body>
+</html>

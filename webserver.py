@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for, flash
 from config_ws import User, app, DataBase,Device,Action, mysql
 from datetime import datetime
+import time
 import pandas as pd
 import dash
 from dash.dependencies import Input, Output
@@ -71,7 +72,6 @@ def add_action():
         if device_id is not None: 
             id = int(device_id)
         else: id = None
-        
         device = DataBase.getDeviceById(id)
         if device:
             objDevice = Device(device.get('id'), device.get('device'), device.get('stanza'))
@@ -81,7 +81,6 @@ def add_action():
             return "Device not found"
 
     elif request.method=='POST':
-       
        date= datetime.now()
        id_Dev = request.form.get('deviceId')
        intensity = request.form.get('brightness')
@@ -101,6 +100,13 @@ def add_action():
 @app.route('/logout')
 def logout():
     return redirect(('/'))
+
+@app.route('/program', methods=['GET', 'POST'])
+def program():
+    if request.method == 'POST':
+        return render_template('program.html')
+
+    
 
 app_d = dash.Dash(__name__, server=app, url_base_pathname='/report/')
 
@@ -132,7 +138,6 @@ def update_graph(selected_drop_down_value):
     fig.update_layout(layout)
 
     return fig
-
 
 if __name__ == '__main__':
     try:

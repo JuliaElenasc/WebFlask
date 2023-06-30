@@ -3,7 +3,6 @@ from flask import Flask
 from flask_mysqldb import MySQL
 
 app = Flask(__name__) # Crea una instancia de la aplicación Flask con el nombre app para el modulo actual
-#app.coonfig['SECRET_KEY']='esto es un secreto'
 app.config['MYSQL_HOST'] = 'localhost' #Establece la configuración para el host de la base de datos MySQL
 app.config['MYSQL_USER'] = 'root'
 app.config['MYSQL_PASSWORD'] = ''
@@ -89,6 +88,12 @@ class DataBase:
     def getDevice():
         sql= "SELECT device FROM device"
         return DataBase.execute_query(sql,fetch_one=False)
+    
+    @staticmethod
+    def postprogram(time, brightness, status, id_Dev, id_user):
+        sql= "INSERT INTO program (time, brightness, status, id_Dev, id_user) VALUES (%s, %s, %s, %s, %s)"
+        values = (time, brightness, status, id_Dev, id_user)
+        return DataBase.execute_query(sql,values,fetch_one=False)
         
 
     @staticmethod
