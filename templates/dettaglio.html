@@ -80,13 +80,17 @@
               </tr>
           </thead>
           <tbody>
+            {% if context %}
               {% for i in range(10) %}
+                       
               <tr>
                   <td>{{ context[0][i] }}</td>
                   <td>{{ context[1][i] }}</td>
                   <td>{{ context[2][i] }}</td>
               </tr>
+              
               {% endfor %}
+            {% endif %}
           </tbody>
       </table>
     </section>

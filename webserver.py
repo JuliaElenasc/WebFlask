@@ -96,7 +96,8 @@ def add_registro():
 
         usuario = User(user, password, nascita, corso,is_admin)
         DataBase.insert_user(usuario)
-        return render_template('dettaglio.html', dettaglioUtente=usuario)
+        context = None
+        return render_template('dettaglio.html', dettaglioUtente=usuario,context=context if context else None)
 
 @app.route('/dettaglio')
 def dettaglio():        
