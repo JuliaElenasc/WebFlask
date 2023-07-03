@@ -39,7 +39,6 @@ class Action:
         #self.pending=pending
 
        
-
 class DataBase:
     @staticmethod # es independiente y se puede llamar directamente desde la clase sin necesidad de crear una instancia
     def insert_user(user):
@@ -92,11 +91,9 @@ class DataBase:
         sql= "SELECT device FROM device"
         return DataBase.execute_query(sql,fetch_one=False)
     
-     
-
     @staticmethod
     def request_graphic(selected_drop_down_value):
-        sql = "SELECT a.date, a.intensity, d.%s FROM actions AS a JOIN device AS d ON a.id_Dev = d.id;"
+        sql = "SELECT a.date, a.intensity, d.%s, u.user FROM actions AS a JOIN device AS d ON a.id_Dev = d.id JOIN user AS u ON a.id_User = u.id;"
         column_name = "device"
         sql = sql % column_name
         result = DataBase.execute_query(sql, fetch_one=False)
@@ -104,7 +101,7 @@ class DataBase:
     
     @staticmethod
     def request_battery_graph(selected_drop_down_value):
-        sql = "SELECT a.date, a.battery, d.%s FROM actions AS a JOIN device AS d ON a.id_Dev = d.id;"
+        sql = "SELECT a.date, a.battery, d.%s, u.user FROM actions AS a JOIN device AS d ON a.id_Dev = d.id JOIN user AS u ON a.id_user = u.id;"
         column_name = "device"
         sql = sql % column_name
         result = DataBase.execute_query(sql, fetch_one=False)
@@ -115,6 +112,7 @@ class DataBase:
         sql = "SELECT * FROM actions WHERE id_user IN (SELECT id FROM user WHERE user = %s)"
         values = (user,)
         return DataBase.execute_query(sql, values, fetch_one=False)
+  
     
     @staticmethod
     def execute_query(sql, values=None, fetch_one=False):

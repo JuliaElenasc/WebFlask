@@ -53,7 +53,7 @@ body{
       transform: perspective(30px) rotateX(20deg);
       transform-origin: center;
       border-radius: 20px 20px 0px 0px;
-      webkit-animation-name: bounceInDown;
+      
     }
 
     #interior{
@@ -75,9 +75,6 @@ body{
       transform-origin: center;
       z-index: 10;
     }
-
-
-
 
     #cover{
       width: 380px;
@@ -169,4 +166,32 @@ body{
 
 .button:hover {
   background-color: #ddd;
+}
+
+.personalized-options {
+  display: none;
+}
+#personalized:checked + .personalized-options {
+  display: block;
+}
+.container {
+  display: flex;
+}
+.controls-column {
+  flex: 1;
+  padding: 20px;
+}
+.lamp-column {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+#ilustracion {
+  max-width: 400px;
+  height: auto;
+  margin-right: 500px;
+}
+.button {
+  padding: 10px 20px;
 }

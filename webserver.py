@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, flash
+from flask import Flask, render_template, request, redirect, url_for, flash, session
 from config_ws import User, app, DataBase,Device,Action
 from datetime import datetime
 import pandas as pd
@@ -6,7 +6,6 @@ import dash
 from dash import Dash, html, dcc, callback, Output, Input
 import plotly.express as px
 import plotly.graph_objects as go
-from flask import session
 from apscheduler.schedulers.background import BackgroundScheduler
 import numpy as np
 import matplotlib as plt
@@ -200,19 +199,34 @@ def update_dropdown(search_value):
 def update_graph(selected_drop_down_value):
     result = DataBase.request_graphic(selected_drop_down_value)
     dff = pd.DataFrame(result)
-    dff.columns = ['Fecha', 'brigthness', 'Device']
+    dff.columns = ['Date', 'brigthness', 'Device', 'User']
     dff_filtered = dff[dff['Device'] == selected_drop_down_value]
+    users = dff_filtered['User'].unique()
+    colors = px.colors.qualitative.Plotly[:len(users)]
+    fig = go.Figure()
+    for i, user in enumerate(users):
+        user_data = dff_filtered[dff_filtered['User'] == user]
+        fig.add_trace(go.Scatter(x=user_data['Date'], y=user_data['brigthness'],
+                                 name=user, line=dict(color=colors[i])))
+    fig.update_layout(xaxis_title='Date', yaxis_title='Brightness')
 
-    return px.line(dff_filtered, x='Fecha', y='brigthness')
+    return fig
 
 @app_d.callback(Output('battery-graph', 'figure'), [Input('my-dropdown', 'value')])
 def update_battery_graph(selected_drop_down_value):
     result = DataBase.request_battery_graph(selected_drop_down_value)  
     dff = pd.DataFrame(result)
-    dff.columns = ['Fecha', 'battery_level', 'Device']
+    dff.columns = ['Date', 'battery_level', 'Device','User']
     dff_filtered = dff[dff['Device'] == selected_drop_down_value]
-
-    return px.line(dff_filtered, x='Fecha', y='battery_level')
+    users = dff_filtered['User'].unique()
+    colors = px.colors.qualitative.Plotly[:len(users)]
+    fig = go.Figure()
+    for i, user in enumerate(users):
+        user_data = dff_filtered[dff_filtered['User'] == user]
+        fig.add_trace(go.Scatter(x=user_data['Date'], y=user_data['battery_level'],
+                                 name=user, line=dict(color=colors[i])))
+    fig.update_layout(xaxis_title='Date', yaxis_title='battery_level')
+    return fig
     
 if __name__ == '__main__':
     

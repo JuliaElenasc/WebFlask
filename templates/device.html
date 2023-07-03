@@ -1,53 +1,47 @@
-<!DOCTYPE html>
+<!<!DOCTYPE html>
 <html>
 <head>
   <title>ControlDevice</title>
   <link rel="stylesheet" type="text/css" href="static/device.css">
-  <style>
-    .personalized-options {
-      display: none;
-    }
-    #personalized:checked + .personalized-options {
-      display: block;
-    }
-  </style>
+  
 </head>
 <body>
-<header id="controls">
-  <quote></quote>
-  <h2>Setup</h2>
-  <h3>Turn on the lamp</h3>
-  <form action='/device' method="POST" >
-    <input name="deviceId" type="hidden" value="{{device.id}}"> 
-    <div class="Turn_on"> <!-- Botón para encender -->
-      <input type="checkbox" name="check" value="1" id="Turn_on"  checked/>
-      <label for="Turn_on"></label>
+  <div class="container">
+    <div class="controls-column">
+      <header id="controls">
+        <quote></quote>
+        <h2>Setup</h2>
+        <h3>Turn on the lamp</h3>
+        <form action='/device' method="POST">
+          <input name="deviceId" type="hidden" value="{{device.id}}">
+          <div class="Turn_on"> <!-- Botón para encender -->
+            <input type="checkbox" name="check" value="1" id="Turn_on" checked/>
+            <label for="Turn_on"></label>
+          </div>
+          <div id="regulate_intensity"> <!-- Intensidad -->
+            <h3>Adjust light brightness</h3>
+            <input id="contrast" type="range" name="brightness" value="5" max="5" min="0" step="1" value="0">
+          </div>
+          <div>
+            <input class="button" type="submit" value="Save">
+            <a class="button" href="/logout">Logout</a>
+            <button class="button" type="submit" formaction="/program">Programa</button>
+          </div>
+        </form>
+      </header>
     </div>
-    <div id="regulate_intensity"> <!-- Intensidad -->
-      <h3>Adjust light brightness</h3>
-      <input id="contrast" type="range" name="brightness" value="5" max="5" min="0" step="1" value="0"></input>
+    <div class="lamp-column">
+      <section id="ilustracion">
+        <div id="contenedorlampara">
+          <div id="techo"></div>
+          <div id="cable"></div>
+          <div id="lampara"></div>
+          <div id="interior"></div>
+          <div id="luz"></div>
+        </div>
+      </section>
     </div>
-    
-    <div> 
-      <input class="button" type="submit" value="Save">
-      <a class="button" href="/logout">Logout</a>
-      <button class="button" type="submit" formaction="/program">Programa</button>
-    </div>  
-  
-
-<!-- Header -->
-
-<section id="ilustracion">
-  <div id="contenedorlampara">
-    <div id="techo"></div>
-    <div id="cable"></div>
-    <div id="lampara"></div>
-    <div id="interior"></div> 
-    <div id="luz"></div>
   </div>
-  
-   
-</section>
-
 </body>
 </html>
+
