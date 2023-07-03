@@ -1,13 +1,17 @@
 from flask import Flask, render_template, request, redirect, url_for, flash
-from config_ws import User, app, DataBase,Device,Action, mysql
+from config_ws import User, app, DataBase,Device,Action
 from datetime import datetime
-import time
 import pandas as pd
 import dash
-from dash.dependencies import Input, Output
-from dash import dcc
-from dash import html
+from dash import Dash, html, dcc, callback, Output, Input
+import plotly.express as px
 import plotly.graph_objects as go
+from flask import session
+from apscheduler.schedulers.background import BackgroundScheduler
+import numpy as np
+import matplotlib as plt
+
+scheduler = BackgroundScheduler()
 
 @app.route('/')
 def home():
@@ -18,53 +22,86 @@ def login():
     if request.method == 'POST':
         user = request.form['user']
         password = request.form['password']
-        data = DataBase.obtain_user(user, password)
-        dataDev = DataBase.obtain_device()
+        data = DataBase.get_user(user, password)  # valida credenciales
+        dataDev = DataBase.obtain_device()  # obtiene los device de una lista
+        if data is not None and data[5] == 1:  # si las credenciales del usuario son admin va al reporte
+            return redirect('/report/')
+        else:  # si no crea detaglio utente y la lista de devices
+            if data:
+                dettaglioUtente = {
+                    "username": data[1],
+                    "password": data[2],
+                    "nascita": data[3],
+                    "corso": data[4]
+                }
 
-        listDevice = []
-        for itemDev in dataDev:
-            listDevice.append(Device(itemDev[0], itemDev[1], itemDev[2]))
+                session['username'] = user
+                session['password'] = password
 
-        if data:
-            dettaglioUtente = {
-                "username": data[1],
-                "password": data[2],
-                "nascita": data[3],
-                "corso": data[4]
-            }
-            
-            if bool(data[6]): # 6 es el ultimo elemento en la lista resultante de la query
-                return redirect('/report/')
-            else:
-                return render_template('dettaglio.html', dettaglioUtente=dettaglioUtente, listDevice = listDevice)
-        else:
-            flash('Credenziali errate, prova di nuovo')
-            return redirect(url_for('login'))
-    
+                listDevice = []
+                for itemDev in dataDev:
+                    listDevice.append(Device(itemDev[0], itemDev[1], itemDev[2]))
+
+                list_actions = DataBase.get_user_actions(user)
+                context = None
+                if list_actions is not None:
+                    list_actions_user = []
+                    for action in list_actions:
+                        action_data = {
+                            'id': action[0],
+                            'value_state': action[1],
+                            'intensity': action[2],
+                            'battery': action[3],
+                            'date': action[4],
+                            'id_Dev': action[5],
+                            'id_user': action[6]
+                        }
+                        list_actions_user.append(action_data)
+                    if list_actions_user:
+                        battery_values = [action['battery'] for action in list_actions_user]
+                        intensity_values = [action['intensity'] for action in list_actions_user]
+                        battery_coef = np.polyfit(range(len(battery_values)), battery_values, 2)
+                        intensity_coef = np.polyfit(range(len(intensity_values)), intensity_values, 2)
+                        num_predictions = 10
+                        action_future = range(len(battery_values), len(battery_values) + num_predictions)
+                        predicted_battery = [round(value) for value in np.polyval(battery_coef, action_future)]
+                        predicted_intensity = [round(value) for value in np.polyval(intensity_coef, action_future)]
+
+                        context = (list(action_future), predicted_battery, predicted_intensity)
+
+                        return render_template('dettaglio.html', dettaglioUtente=dettaglioUtente, listDevice=listDevice, list_actions=list_actions_user, context=context)
+                    else:
+                        message = "No se encontraron acciones para el usuario."
+                        return render_template('dettaglio.html', dettaglioUtente=dettaglioUtente, error=message, listDevice=[], list_actions=[], context=context)
+                else:
+                    message = "No se encontraron acciones para el usuario."
+                    return render_template('dettaglio.html', dettaglioUtente=dettaglioUtente, error=message, listDevice=[], list_actions=[], context=context)
+
     return render_template('login.html')
+
 
 
 @app.route ('/registro')
 def registro():
     return render_template ('registro.html')
 
-@app.route('/addregistro', methods=['POST'])
+@app.route('/add_registro', methods=['POST'])
 def add_registro():    
     if request.method =='POST':
         user = request.form['user']
         password = request.form['password']
         nascita = request.form['nascita']
         corso = request.form['corso']
-        usuario = User(user, password, nascita, corso)
+        is_admin = request.form.get('admin') == '1'
+
+        usuario = User(user, password, nascita, corso,is_admin)
         DataBase.insert_user(usuario)
         return render_template('dettaglio.html', dettaglioUtente=usuario)
 
 @app.route('/dettaglio')
-def dettaglio():
-    data = DataBase.obtain_user()
-    return render_template('dettaglio.html', dettaglioUtente=data)
+def dettaglio():        
+    return render_template('dettaglio.html')
     
-
 @app.route('/device', methods=['GET','POST'])
 def add_action():
     if request.method == 'GET':
@@ -82,18 +119,32 @@ def add_action():
 
     elif request.method=='POST':
        date= datetime.now()
-       id_Dev = request.form.get('deviceId')
+       id_Dev = 1 # Prof. Lezzi Non ho finito di definire la logica della programmazione delle azioni
        intensity = request.form.get('brightness')
-       battery= 100-(int(intensity)* 2)
-       id_user = 1
-       value_state = request.form.get('check')
-       
-       if value_state is None:
-            value_state = "0"
-       else: value_state="1"
-       data=Action(value_state,intensity,battery,date, id_Dev, id_user)
-       DataBase.control_device(data)
-       return redirect('/device?deviceId='+str(id_Dev))
+       battery= 100-(int(intensity)* 5)#inicalmente 2 ahora 5
+       scheduled_date=request.form.get('scheduled_date')#campo nuevo
+       if scheduled_date is None:
+           scheduled_date=date
+       pending=request.form.get('pending')#campo nuevo
+       if pending is None:
+           pending=0
+       else: pending=1
+
+       username=session.get('username')
+       password=session.get('password')
+       user = DataBase.get_user(username, password)
+       if user:
+            id_user = user[0]
+            value_state = request.form.get('check')
+            if value_state is None:
+                value_state = "0"
+            else:
+                value_state = "1"
+            data = Action(value_state, intensity, battery, date, id_Dev, id_user,scheduled_date,pending)
+            DataBase.control_device(data)
+            return redirect('/device?deviceId=' + str(id_Dev))
+       else: 
+           return "Invalid user"
     else:
         return render_template("device.html")
     
@@ -101,23 +152,36 @@ def add_action():
 def logout():
     return redirect(('/'))
 
-@app.route('/program', methods=['GET', 'POST'])
+@app.route('/program', methods=['GET', 'POST']) # Prof. Lezzi Non ho finito di definire la logica della programmazione delle azioni
 def program():
-    if request.method == 'POST':
-        return render_template('program.html')
+       return render_template('program.html')
 
     
+external_stylesheets = ['/static/stile.css']
 
-app_d = dash.Dash(__name__, server=app, url_base_pathname='/report/')
+app_d = dash.Dash(__name__, server=app, url_base_pathname='/report/', external_stylesheets=external_stylesheets)
 
-app_d.layout = html.Div([
-    dcc.Dropdown(
-        id='my-dropdown',
-        options = [],
-        value=None
-    ),
-    dcc.Graph(id='my-graph')
-], style={'width': '500px'})
+app_d.layout = html.Div(
+    className='container',
+    children=[
+        html.H1('Report'),
+        dcc.Dropdown(
+            id='my-dropdown',
+            options=[],
+            value=None
+        ),
+        dcc.Graph(
+            id='intensity-graph',
+            className='graph'
+        ),
+        dcc.Graph(
+            id='battery-graph',
+            className='graph'
+        )
+    ]
+)
+
+
 
 @app_d.callback( Output('my-dropdown', 'options'), Output('my-dropdown', 'value'), [Input('my-dropdown', 'search')])
 def update_dropdown(search_value):
@@ -126,24 +190,28 @@ def update_dropdown(search_value):
     value=None
     return options, value
 
-@app_d.callback(Output('my-graph', 'figure'), [Input('my-dropdown', 'value')])
+@app_d.callback(Output('intensity-graph', 'figure'), [Input('my-dropdown', 'value')])
 def update_graph(selected_drop_down_value):
     result = DataBase.request_graphic(selected_drop_down_value)
-    result_list = [result]  # Convertir el resultado en una lista de una tupla
-    df = pd.DataFrame(result_list, columns=['date', 'intensity', 'device'])
-    fig = go.Figure()
-    fig.add_trace(go.Scatter(x=df['date'], y=df['intensity'], mode='lines'))
+    dff = pd.DataFrame(result)
+    dff.columns = ['Fecha', 'brigthness', 'Device']
+    dff_filtered = dff[dff['Device'] == selected_drop_down_value]
 
-    layout = {'margin': {'l': 40, 'r': 10, 't': 20, 'b': 30}}
-    fig.update_layout(layout)
+    return px.line(dff_filtered, x='Fecha', y='brigthness')
 
-    return fig
+@app_d.callback(Output('battery-graph', 'figure'), [Input('my-dropdown', 'value')])
+def update_battery_graph(selected_drop_down_value):
+    result = DataBase.request_battery_graph(selected_drop_down_value)  
+    dff = pd.DataFrame(result)
+    dff.columns = ['Fecha', 'battery_level', 'Device']
+    dff_filtered = dff[dff['Device'] == selected_drop_down_value]
 
+    return px.line(dff_filtered, x='Fecha', y='battery_level')
+    
 if __name__ == '__main__':
+    
     try:
         app.run(debug=True,host="0.0.0.0")
     except KeyboardInterrupt:
         DataBase.close()
 
-#Unir registro y add registro
-#Crear en vez de flash un otro html else reurn redirect al endpoint return(redirect"/passerror")

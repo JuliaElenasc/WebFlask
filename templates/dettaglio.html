@@ -3,13 +3,22 @@
 <head>
     <title>Profile</title>
     <link rel="stylesheet" type="text/css" href="static/stile.css">
+    <style>
+      .table-container {
+          display: flex;
+      }
+
+      .table-container table {
+          margin-right: 20px;
+      }
+  </style>
 </head>
 <body>
     <h1>Profile</h1>
     <p>Welcome, <span id="user">{{dettaglioUtente.username}}</span>!</p>
     <p>Name: <span id="name">{{dettaglioUtente.username}}</span></p>
     <p>Data Nascita: <span id="nascita">{{dettaglioUtente.nascita}}</span></p>
-    <p>Corso: <span id="corso">{{dettaglioUtente.corso}}</span></p>
+    <p>Course: <span id="corso">{{dettaglioUtente.corso}}</span></p>
     <div>
         <h3>Choose the device</h3>
     </div>
@@ -21,8 +30,67 @@
                 {%endfor%}
             </select>
             <input class="button" type="submit" value="Submit">
+            
         </form>
+        
     </div>
-
+  <div class="table-container">
+    {% if error %}
+      <p>{{ error }}</p>
+    {% else %}
+    <section id="actions-table">
+      <h3>Actions performed by the registered user</h3>
+      <table>
+        <thead>
+          <tr>
+            <tr>
+              <th>Nro</th>
+              <th>Value State</th>
+              <th>Intensity</th>
+              <th>Battery</th>
+              <th>Date</th>
+              <th>Device</th>
+              <th>User</th>
+            </tr>
+          </tr>
+        </thead>
+        <tbody>
+          {% for action in list_actions %}
+          <tr>
+            <td>{{ action.id }}</td>
+            <td>{{ action.value_state }}</td>
+            <td>{{ action.intensity }}</td>
+            <td>{{ action.battery }}</td>
+            <td>{{ action.date }}</td>
+            <td>{{ action.id_Dev }}</td>
+            <td>{{ action.id_user }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </section>
+    <section id="second-table">
+      <h3> Forecasts of the next 10 possible configurations</h3>
+      <table>
+          <thead>
+              <tr>
+                  <th>Action future</th>
+                  <th>Predicted Battery</th>
+                  <th>Predicted Intensity</th>
+              </tr>
+          </thead>
+          <tbody>
+              {% for i in range(10) %}
+              <tr>
+                  <td>{{ context[0][i] }}</td>
+                  <td>{{ context[1][i] }}</td>
+                  <td>{{ context[2][i] }}</td>
+              </tr>
+              {% endfor %}
+          </tbody>
+      </table>
+    </section>
+    {% endif %}
+  </div> 
 </body>
 </html>

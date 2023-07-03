@@ -16,3 +16,96 @@ body{
     display: inline-block;
     font-size: 16px;
 }
+.Turn_on {
+    width: 80px;
+    height: 27px;
+    background: #333;
+    position: relative;
+    border-radius: 50px;
+    box-shadow: inset 0px 1px 1px rgba(0, 0, 0, 0.5), 0px 1px 0px rgba(255, 255, 255, 0.2);
+    
+  }
+  .Turn_on:after {
+    content: 'OFF';
+    color: #000;
+    position: absolute;
+    right: 10px;
+    z-index: 0;
+    font: 12px/26px Arial, sans-serif;
+    font-weight: bold;
+    text-shadow: 1px 1px 0px rgba(255, 255, 255, 0.15);
+  }
+  .Turn_on:before {
+    content: 'ON';
+    color: #27ae60;
+    position: absolute;
+    left: 10px;
+    z-index: 0;
+    font: 12px/26px Arial, sans-serif;
+    font-weight: bold;
+  }
+  .Turn_on label {
+    display: block;
+    width: 34px;
+    height: 20px;
+    cursor: pointer;
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    z-index: 1;
+    background: #fcfff4;
+    background: -webkit-linear-gradient(top, #fcfff4 0%, #dfe5d7 40%, #b3bead 100%);
+    background: linear-gradient(to bottom, #fcfff4 0%, #dfe5d7 40%, #b3bead 100%);
+    border-radius: 50px;
+    -webkit-transition: all 0.4s ease;
+            transition: all 0.4s ease;
+    box-shadow: 0px 2px 5px 0px rgba(0, 0, 0, 0.3);
+  }
+  .Turn_on input[type=checkbox] {
+    visibility: hidden;
+  }
+  .Turn_on input[type=checkbox]:checked + label {
+    left: 43px;
+  } 
+
+  .container {
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+.graph {
+    margin-top: 20px;
+}
+
+.table-container {
+  display: flex;
+  justify-content: space-evenly;
+}
+
+.table-container table {
+  margin-right: 20px;
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+/* Estilo para las celdas de encabezado */
+th {
+  background-color: #f2f2f2;
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: left;
+}
+
+/* Estilo para las celdas de datos */
+td {
+  border: 1px solid #ddd;
+  padding: 8px;
+}
+
+/* Estilo para las filas alternas (opcional) */
+tr:nth-child(even) {
+  background-color: #f9f9f9;
+}

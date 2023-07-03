@@ -15,23 +15,23 @@
 <header id="controls">
   <h2>Programming</h2>
       
-  <form action="/program" method="POST">
+  <form action="/device" method="POST">
 
     <h3>Hour</h3>
     <div class="data">
-        <label for="time">Time:</label>
-        <input type="time" id="time" name="time">
+        <label for="Hour"></label>
+        <input type="time" id="hour" name="hour" >
     </div>
     <h3>Frequency</h3>
     <div class="data">
-      <input type="radio" name="option" value="oggi" id="oggi">
-      <label for="oggi">Oggi</label>
-      <input type="radio" name="option" value="lun_vie" id="lun_vie">
-      <label for="lun_vie">Lun-Ven</label>
+      <input type="radio" name="option" value="today" id="today">
+      <label for="today">Today</label>
+      <input type="radio" name="option" value="mon_fri" id="mon_fri">
+      <label for="mon_fri">Mon-Fri</label>
       <input type="radio" name="option" value="every_day" id="every_day">
-      <label for="every_day">Tutti giorni</label>
+      <label for="every_day">Every day</label>
       <input type="radio" name="option" value="personalized" id="personalized">
-      <label for="personalized">Personalizzato</label>
+      <label for="personalized">Personalized</label>
       <div class="personalized-options">
         <h3>Personalized Options</h3>
         <input type="checkbox" name="Monday" value="Monday" id="Monday">
@@ -50,7 +50,13 @@
         <label for="Sunday">Sunday</label>
       </div>
     </div>
-    <div id="regulate_intensity"> <!-- Intensidad -->
+    <h3>State for the lamp</h3>
+    <div class="Turn_on"> <!-- Botón para encender -->
+        <input type="checkbox" name="check" value="1" id="Turn_on"  checked/>
+        <label for="Turn_on"></label>
+    </div>
+
+    <div id="regulate_intensity"> 
       <h3>Adjust light brightness</h3>
       <input id="contrast" type="range" name="brightness" value="5" max="5" min="0" step="1"></input>
     </div>
@@ -65,6 +71,7 @@
     var personalizedOptions = document.querySelector(".personalized-options");
     personalizedOptions.style.display = this.checked ? "block" : "none";
   });
+  
 </script>
 
 </body>
