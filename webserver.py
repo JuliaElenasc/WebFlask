@@ -72,10 +72,10 @@ def login():
                         return render_template('dettaglio.html', dettaglioUtente=dettaglioUtente, listDevice=listDevice, list_actions=list_actions_user, context=context)
                     else:
                         message = "No se encontraron acciones para el usuario."
-                        return render_template('dettaglio.html', dettaglioUtente=dettaglioUtente, error=message, listDevice=[], list_actions=[], context=context)
+                        return render_template('dettaglio.html', dettaglioUtente=dettaglioUtente, error=message, listDevice=listDevice, list_actions=[], context=context)
                 else:
                     message = "No se encontraron acciones para el usuario."
-                    return render_template('dettaglio.html', dettaglioUtente=dettaglioUtente, error=message, listDevice=[], list_actions=[], context=context)
+                    return render_template('dettaglio.html', dettaglioUtente=dettaglioUtente, error=message, listDevice=listDevice, list_actions=[], context=context)
 
     return render_template('login.html')
 
@@ -97,7 +97,12 @@ def add_registro():
         usuario = User(user, password, nascita, corso,is_admin)
         DataBase.insert_user(usuario)
         context = None
-        return render_template('dettaglio.html', dettaglioUtente=usuario,context=context if context else None)
+        dataDev = DataBase.obtain_device()
+        listDevice = []
+        for itemDev in dataDev:
+            listDevice.append(Device(itemDev[0], itemDev[1], itemDev[2]))
+
+        return render_template('dettaglio.html', dettaglioUtente=usuario,listDevice=listDevice,context=context if context else None)
 
 @app.route('/dettaglio')
 def dettaglio():        
